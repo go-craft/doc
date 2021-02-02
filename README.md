@@ -1,0 +1,2 @@
+# doc
+Go-craft documents
