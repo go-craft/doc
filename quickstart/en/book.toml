@@ -1,0 +1,6 @@
+[book]
+authors = ["Bison 'goldeagle' Fan"]
+language = "en"
+multilingual = false
+src = "src"
+title = "Go-Craft Quick Start"
