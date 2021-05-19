@@ -1,0 +1,340 @@
+openapi: "3.0.3"
+info:
+  version: 0.0.1
+  title: Go-Craft 低代码工具
+  description: |
+    Go-Craft 低代码工具
+  license:
+    name: MIT
+    url: https://www.dgbic.com
+servers:
+  - url: http://gc.enet51.com
+    description: 国内测试地址
+  - url: http://gc.vm
+    description: 内网测试地址
+tags:
+- name: "project"
+  description: "项目相关接口"
+- name: "editor"
+  description:  "编辑器相关接口"
+- name: "generate"
+  description: "生成器相关接口"
+- name: "ddl"
+  description: "数据库相关接口"
+- name: "auth"
+  description: "权限相关接口"
+paths:
+  /ipc/pushMachineHeartBeat:
+    post:
+      summary: 更新设备心跳信息，更新周期为30分钟一次，心跳信息中包含传感器状态监测
+      operationId: ipcPushDeviceHeartBeat
+      tags:
+        - ipc
+      parameters:
+        - name: gravity_status
+          in: 'query'
+          description: 重力传感器状态
+          required: true
+          schema:
+            type: integer
+            format: tinyint(1)
+            default: 1
+            example: 0-故障，1-正常
+        - name: camera_status
+          in: 'query'
+          description: 摄像头状态
+          required: true
+          schema:
+            type: integer
+            format: tinyint(1)
+            default: 1
+            example: 0-故障，1-正常
+        - name: printer_status
+          in: 'query'
+          description: 打印机状态
+          required: true
+          schema:
+            type: integer
+            format: tinyint(1)
+            default: 1
+            example: 0-故障，1-正常，2-缺纸
+        - name: plc_status
+          in: 'query'
+          description: PLC状态
+          required: true
+          schema:
+            type: integer
+            format: tinyint(1)
+            default: 1
+            example: 0-故障，1-正常
+        - name: scanner1_status
+          in: 'query'
+          description: 高位条码扫描枪状态
+          required: true
+          schema:
+            type: integer
+            format: tinyint(1)
+            default: 1
+            example: 0-故障，1-正常
+        - name: scanner2_status
+          in: 'query'
+          description: 低位条码扫描枪状态
+          required: true
+          schema:
+            type: integer
+            format: tinyint(1)
+            default: 1
+            example: 0-故障，1-正常
+        - name: mic_status
+          in: 'query'
+          description: 麦克风状态
+          required: true
+          schema:
+            type: integer
+            format: tinyint(1)
+            default: 1
+            example: 0-故障，1-正常
+        - name: human_detection_status
+          in: 'query'
+          description: 人体感应传感器状态
+          required: true
+          schema:
+            type: integer
+            format: tinyint(1)
+            default: 1
+            example: 0-故障，1-正常
+        - name: motor_status
+          in: 'query'
+          description: 电机马达状态
+          required: true
+          schema:
+            type: integer
+            format: tinyint(1)
+            default: 1
+            example: 0-故障，1-正常
+        - name: gate_status
+          in: 'query'
+          description: 压瓶门状态
+          required: true
+          schema:
+            type: integer
+            format: tinyint(1)
+            default: 1
+            example: 0-故障，1-正常
+        - name: app-id
+          in: 'header'
+          description: 设备安装时候生成的uuid
+          required: true
+          schema:
+            type: string
+            example: 6afa0773-f2b0-4ac2-949b-5c1b1cd80b8e
+        - name: app-key
+          in: 'header'
+          description: rvm 平台的公钥，相对固定的字符串
+          required: true
+          schema:
+            type: string
+            example: YjYxMzY3OWEwODE0ZDllYzc3MmY5NWQ3NzhjMzVmYzVmZjE2OTdjNDkzNzE1NjUzYzZjNzEyMTQ0MjkyYzVhZA==
+      responses:
+        '200':
+          description: 心跳发布结果
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+components:
+  schemas:
+    Company:
+      description: 公司信息，即项目所有者
+      properties:
+        name:
+          type: string
+          format: varchar(100)
+          description: 公司名称（母语）
+          default: '东莞市拜森信息咨询有限公司'
+          example: '东莞市拜森信息咨询有限公司'
+        name_en:
+          type: string
+          format: varchar(250)
+          description: 公司名称（英语）
+          default: 'Dongguan Bison Information Consulting Co., Ltd.'
+          example: 'Dongguan Bison Information Consulting Co., Ltd.'
+        website:
+          type: string
+          format: varchar(255)
+          description: 公司网站地址
+          default: 'http://www.dgbic.com'
+          example: 'http://www.dgbic.com'
+        projects:
+          description: 公司相关项目
+          type: array
+          items:
+            $ref: '#/components/schemas/Project'
+    Project:
+      type: object
+      description: 项目
+      properties:
+        name:
+          type: string
+          format: varchar(100)
+          default: 'go-craft'
+          description: |
+            项目名称，最多100个字符
+        copyright:
+          type: string
+          format: varchar(50)
+          description: 版权信息
+          default: '&copy; 2021'
+          example: '&copy; 2021 DGBIC'
+        shell_lang:
+          description: 运维脚本使用的语言
+          $ref: '#/components/schemas/DevLanguage'
+        applications:
+          description: 项目下的应用
+          type: array
+          items:
+            $ref: '#/components/schemas/Application'
+        comment:
+          type: string
+          format: varchar(255)
+          description: 项目的备注信息
+    Application:
+      description: 应用，与 Project 是多对一关系
+      properties:
+        name:
+          type: string
+          format: varchar(150)
+          description: 应用名称，支持英文、数字、-_ 等符号
+          default: 'app'
+          example: 'app'
+        nameSpace:
+          type: string
+          format: varchar(150)
+          description: 应用对应的命名空间，支持英文、数字、-_、. 等符号
+          default: 'app'
+          example: 'app'
+        servers:
+          type: array
+          description: 应用绑定的地址列表，比如：本地测试地址，测试环境地址，生产环境地址等
+          items:
+            $ref: '#/components/schemas/Server'
+        pattern:
+          type: integer
+          format: tinyint(1)
+          description: 应用模式
+          enum:
+            - 1 #MVC 独立应用
+            - 2 #DDD 独立应用
+            - 3 #API
+        is_sperated:
+          type: integer
+          format: tinyint(1)
+          description: 是否前后端分离
+          enum:
+            - 0 #否
+            - 1 #是
+        fe_framework:
+          description: 前端框架
+          $ref: '#/components/schemas/Framework'
+        be_framework:
+          description: 后端框架
+          $ref: '#/components/schemas/Framework'
+    Server:
+      type: object
+      description: 域名信息，与 Application 是多对一关系
+      required:
+      - application
+      properties:
+        name:
+          type: string
+          format: varchar(255)
+          description: 域名名称
+          default: "http://gc.vm/api"
+          example: "http://gc.dgbic.com/api"
+        comment:
+          description: 域名说明
+          type: string
+          format: varchar(255)
+          default: "http://gc.vm"
+          example: "http://gc.vm"
+    Framework:
+      description: 前端、后端开发使用的框架
+      properties:
+        name:
+          type: string
+          format: varchar(150)
+          description: 框架名称
+          default: 'ThinkPHP'
+          example: 'ThinkPHP'
+        lang:
+          description: 框架使用的主语言，与 DevLanguage 是一对一关系
+          $ref: '#/components/schemas/DevLanguage'
+        stable_version:
+          type: string
+          format: varchar(50)
+          description: 框架稳定版本
+          default: '6.0.7'
+          example: '6.0.7'
+        latest_version:
+          type: string
+          format: varchar(50)
+          description: 框架最新版本
+          default: '6.0.7'
+          example: '6.0.7'
+    DevLanguage:
+      description: 前端、后端、脚本开发用的语言
+      properties:
+        lang:
+          type: string
+          format: varchar(50)
+          description: 语言名称
+          default: 'PHP'
+          example: 'PHP' 
+        url:
+          type: string
+          format: varchar(255)
+          description: 语言官网
+          default: 'http://www.php.net'
+          example: 'http://www.php.net'
+        stable_version:
+          type: string
+          format: varchar(50)
+          description: 语言稳定版本
+          default: '8.0.3'
+          example: '8.0.3'
+        latest_version:
+          type: string
+          format: varchar(50)
+          description: 语言最新版本
+          default: '8.0.3'
+          example: '8.0.3'
+    Success:
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int(4)
+          default: 1
+        message:
+          type: string
+          example: "Succeed"
+    Error:
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int(4)
+          default: 0
+        message:
+          type: string
+          example: "Operation Failed"
